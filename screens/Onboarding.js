@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { useNavigation } from '@react-navigation/native';
 
 export default function LittleLemonOnboarding() {
 
@@ -7,51 +8,41 @@ export default function LittleLemonOnboarding() {
   const [email, setEmail] = useState('');
   const [firstNameError, setFirstNameError] = useState('');
   const [emailError, setEmailError] = useState('');
-
-  
+  const navigation = useNavigation();
 
   // validate the email input
   const validateEmail = () => {
-    // use a simple regex to check the email format
     let regex = /\S+@\S+\.\S+/;
-    // test the input value against the regex
     let isValid = regex.test(email);
-    // if the email is not valid, set the error message
     if (!isValid) {
       setEmailError('Please enter a valid email address');
     } else {
-      // if the email is valid, clear the error message
       setEmailError('');
     }
   };
 
   // validate the first name input
   const validateFirstName = () => {
-    // check if the input is empty
     if (firstName === '') {
       setFirstNameError('First name is required');
-      return;
+      return false;
     }
-    // check if the input contains only letters
     let regex = /^[A-Za-z]+$/;
     if (!regex.test(firstName)) {
       setFirstNameError('First name must contain only letters');
-      return;
+      return false;
     }
-    // if no error, clear the error message
     setFirstNameError('');
+    return true;
   };
 
   const handleNext = () => {
-    // Validate inputs before proceeding
-    validateFirstName();
+    const isFirstNameValid = validateFirstName();
     validateEmail();
 
-    // Check if there are any errors before proceeding
-    if (!firstNameError && !emailError) {
-      // do something with firstName and email
-      console.log('First Name:', firstName);
-      console.log('Email:', email);
+    if (isFirstNameValid && emailError === '') {
+      // Both first name and email are valid, navigate to the next screen
+      navigation.navigate('Home');
     }
   };
 
@@ -70,7 +61,7 @@ export default function LittleLemonOnboarding() {
           value={firstName}
           onChangeText={setFirstName}
           placeholder="Enter your first name"
-          onChange={validateFirstName}
+          onBlur={validateFirstName}
         />
         {/* display the error message */}
         <Text style={styles.errorText}>{firstNameError}</Text>
@@ -83,7 +74,7 @@ export default function LittleLemonOnboarding() {
           onChangeText={setEmail}
           placeholder="Enter your email"
           keyboardType="email-address"
-          onChange={validateEmail}
+          onBlur={validateEmail}
         />
         {/* display the error message */}
         <Text style={styles.errorText}>{emailError}</Text>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LittleLemonOnboarding() {
 
@@ -11,15 +12,16 @@ export default function LittleLemonOnboarding() {
   const navigation = useNavigation();
 
   // validate the email input
-  const validateEmail = () => {
-    let regex = /\S+@\S+\.\S+/;
-    let isValid = regex.test(email);
-    if (!isValid) {
-      setEmailError('Please enter a valid email address');
-    } else {
-      setEmailError('');
-    }
-  };
+const validateEmail = () => {
+  let regex = /\S+@\S+\.\S+/;
+  let isValid = regex.test(email);
+  if (!isValid) {
+    setEmailError('Please enter a valid email address');
+  } else {
+    setEmailError('');
+  }
+  return isValid; // Return the validation result
+};
 
   // validate the first name input
   const validateFirstName = () => {
@@ -36,15 +38,26 @@ export default function LittleLemonOnboarding() {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const isFirstNameValid = validateFirstName();
-    validateEmail();
-
-    if (isFirstNameValid && emailError === '') {
-      // Both first name and email are valid, navigate to the next screen
-      navigation.navigate('Home');
+    const isEmailValid = validateEmail();
+  
+    if (isFirstNameValid && isEmailValid) {
+      // Both first name and email are valid, set onboarding completion status
+      try {
+        await AsyncStorage.setItem('@onboardingCompleted', 'true');
+      } catch (error) {
+        console.error('Error saving onboarding completion status:', error);
+      }
+  
+      // Navigate to the Home screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
     }
   };
+  
 
   return (
     <View style={styles.container}>

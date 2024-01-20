@@ -1,4 +1,4 @@
-import React, { useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -7,11 +7,17 @@ const SplashScreen = ({ navigation }) => {
     const checkOnboardingStatus = async () => {
       try {
         const onboardingCompleted = await AsyncStorage.getItem('@onboardingCompleted');
-        navigation.replace(onboardingCompleted === 'true' ? 'Home' : 'Welcome');
+        
+        // Check if navigation is defined before using it
+        if (navigation) {
+          navigation.replace(onboardingCompleted === 'true' ? 'Home' : 'Welcome');
+        }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
         // Handle the error or redirect to the onboarding screen in case of an error
-        navigation.replace('Welcome');
+        if (navigation) {
+          navigation.replace('Welcome');
+        }
       }
     };
 

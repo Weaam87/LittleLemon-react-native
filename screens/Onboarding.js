@@ -43,11 +43,13 @@ const validateEmail = () => {
     const isEmailValid = validateEmail();
   
     if (isFirstNameValid && isEmailValid) {
-      // Both first name and email are valid, set onboarding completion status
+      // Save data to AsyncStorage if needed
       try {
+        await AsyncStorage.setItem('@userFirstName', firstName);
+        await AsyncStorage.setItem('@userEmail', email);
         await AsyncStorage.setItem('@onboardingCompleted', 'true');
       } catch (error) {
-        console.error('Error saving onboarding completion status:', error);
+        console.error('Error saving data:', error);
       }
   
       // Navigate to the Home screen
@@ -57,6 +59,8 @@ const validateEmail = () => {
       });
     }
   };
+  
+  
   
 
   return (

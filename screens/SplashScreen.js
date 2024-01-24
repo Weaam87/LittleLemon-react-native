@@ -10,7 +10,7 @@ const SplashScreen = ({ navigation }) => {
         
         // Check if navigation is defined before using it
         if (navigation) {
-          navigation.replace(onboardingCompleted === 'true' ? 'Home' : 'Welcome');
+          navigation.replace(onboardingCompleted === 'true' ? 'Profile' : 'Welcome');
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);

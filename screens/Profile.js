@@ -78,4 +78,10 @@ const styles = StyleSheet.create({
     color: '#808080',
     marginBottom: 20,
   },
+  text:{
+    fontSize: 24,
+    color: '#495E57',
+    marginVertical: 8,
+    fontWeight: 'bold',
+  },
 });

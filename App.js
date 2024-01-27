@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View,Image } from 'react-native';
 import LittleLemonOnboarding from './screens/Onboarding';
 import HomeScreen from './screens/HomeScreen';
 import SplashScreen from './screens/SplashScreen';
@@ -25,19 +25,36 @@ export default function App() {
       ) : (
         <View style={styles.container}>
           <Stack.Navigator initialRouteName="Splash">
-            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="Welcome" component={LittleLemonOnboarding} />
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    source={require('./assets/Logo.png')}
+                    style={styles.logo}
+                  />
+                ),
+                headerTitleAlign: 'center',
+              }}
+            />
           </Stack.Navigator>
         </View>
       )}
     </NavigationContainer>
   );
+  
   }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  logo:{
+    aspectRatio: 4, // width:height ratio of the original image (200:50)
+    width: 120,
   },
 });

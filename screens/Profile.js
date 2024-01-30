@@ -13,10 +13,12 @@ export default function ProfileScreen() {
       // Remove user data from AsyncStorage
       await AsyncStorage.removeItem('@userFirstName');
       await AsyncStorage.removeItem('@userEmail');
-  
+      // Remove profile image data
+      await AsyncStorage.removeItem('profileImage');
+
       // Set onboardingCompleted to false
       await AsyncStorage.setItem('@onboardingCompleted', 'false');
-  
+
       // Reset navigation stack and navigate to the Welcome screen
       navigation.reset({
         index: 0,
@@ -26,7 +28,8 @@ export default function ProfileScreen() {
       console.error('Error resetting onboarding:', error);
     }
   };
-  
+
+
 
   useEffect(() => {
     // Fetch the user data from AsyncStorage
@@ -36,8 +39,8 @@ export default function ProfileScreen() {
         const storedEmail = await AsyncStorage.getItem('@userEmail');
 
         // Set the state with the retrieved data
-        setFirstName(storedFirstName || 'No First Name');
-        setEmail(storedEmail || 'No Email');
+        setFirstName(storedFirstName);
+        setEmail(storedEmail);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -78,7 +81,7 @@ const styles = StyleSheet.create({
     color: '#808080',
     marginBottom: 20,
   },
-  text:{
+  text: {
     fontSize: 24,
     color: '#495E57',
     marginVertical: 8,

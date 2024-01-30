@@ -9,7 +9,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -125,7 +124,7 @@ export default function App() {
             <Stack.Screen
               name="Profile"
               component={ProfileScreen}
-              options={{
+              options={({ navigation }) => ({
                 headerTitle: () => (
                   <Image
                     source={require('./assets/Logo.png')}
@@ -134,7 +133,7 @@ export default function App() {
                 ),
                 headerTitleAlign: 'center',
                 headerRight: () => (
-                  <View style={styles.headerRightContainer}>
+                  <View style={styles.headerContainer}>
                     {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
                     {profileImage ? (
                       <TouchableOpacity onPress={pickImage}>
@@ -146,7 +145,7 @@ export default function App() {
                     ) : (
                       <TouchableOpacity onPress={pickImage}>
                         <View style={styles.profileImage}>
-                          <Text style={styles.profileImageText}>
+                          <Text style={styles.imageText}>
                             {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
                           </Text>
                         </View>
@@ -154,7 +153,20 @@ export default function App() {
                     )}
                   </View>
                 ),
-              }}
+                headerLeft: () => (
+                  <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <View style={styles.headerContainer}>
+                      <View style={styles.imageText}>
+                        <Image
+                          source={require('./assets/arrow.png')}
+                          style={styles.arrow}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ),
+                headerBackVisible: false, // This will hide the default back button
+              })}
             />
 
           </Stack.Navigator>
@@ -170,9 +182,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     aspectRatio: 4, // width:height ratio of the original image (200:50)
-    width: 120,
+    width: 160,
   },
-  headerRightContainer: {
+  headerContainer: {
     margin: 8,
   },
   profileImage: {
@@ -180,7 +192,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 30,
   },
-  profileImageText: {
+  imageText: {
     fontSize: 18,
     color: '#F4CE14',
     textAlign: 'center',
@@ -193,5 +205,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center', // Center the Text component vertically
     alignItems: 'center',
   },
+  arrow: {
+    width: 40,
+    height: 40,
+  }
 
 });

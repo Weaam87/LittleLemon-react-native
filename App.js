@@ -16,11 +16,16 @@ export default function App() {
   const [profileImage, setProfileImage] = useState(null);
   const [firstName, setFirstName] = useState('');
 
+  // Update the first name state asynchronously
+  const updateFirstName = async (newFirstName) => {
+    // Set the new first name in the component's state
+    setFirstName(newFirstName);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedFirstName = await AsyncStorage.getItem('@userFirstName');
-        console.log('Stored first name:', storedFirstName);
 
         // Set the state with the retrieved data
         setFirstName(storedFirstName);
@@ -42,7 +47,7 @@ export default function App() {
 
     // Call the function to fetch user data and load profile image
     fetchData();
-  }, []);
+  }, []); // Empty dependency array to run once on mount
 
 
   // Save the provided image URI to AsyncStorage
@@ -119,8 +124,20 @@ export default function App() {
         <View style={styles.container}>
           <Stack.Navigator initialRouteName="Splash">
             <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Welcome" component={LittleLemonOnboarding} />
+
+            {/*Pass the function as children to 'Screen' instead of using the 'component' prop.
+                This prevents the component from being recreated on every render, improving performance.
+                component={(props) => <LittleLemonOnboarding {...props} updateFirstName={updateFirstName} />}
+                .............................................................................................
+                Render the LittleLemonOnboarding component with necessary props:
+                  - props: navigation and other route-related properties
+                  - updateFirstName: callback function to update the first name in App.js state*/}
+            <Stack.Screen name="Welcome">
+              {(props) => <LittleLemonOnboarding {...props} updateFirstName={updateFirstName} />}
+            </Stack.Screen>
+
             <Stack.Screen name="Home" component={HomeScreen} />
+
             <Stack.Screen
               name="Profile"
               component={ProfileScreen}

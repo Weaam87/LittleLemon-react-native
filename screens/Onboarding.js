@@ -3,7 +3,8 @@ import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity } from "reac
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function LittleLemonOnboarding() {
+//updateFirstName - Callback function to update the first name in the parent component.
+export default function LittleLemonOnboarding({ updateFirstName }) {
 
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
@@ -12,16 +13,16 @@ export default function LittleLemonOnboarding() {
   const navigation = useNavigation();
 
   // validate the email input
-const validateEmail = () => {
-  let regex = /\S+@\S+\.\S+/;
-  let isValid = regex.test(email);
-  if (!isValid) {
-    setEmailError('Please enter a valid email address');
-  } else {
-    setEmailError('');
-  }
-  return isValid; // Return the validation result
-};
+  const validateEmail = () => {
+    let regex = /\S+@\S+\.\S+/;
+    let isValid = regex.test(email);
+    if (!isValid) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+    return isValid; // Return the validation result
+  };
 
   // validate the first name input
   const validateFirstName = () => {
@@ -41,7 +42,7 @@ const validateEmail = () => {
   const handleNext = async () => {
     const isFirstNameValid = validateFirstName();
     const isEmailValid = validateEmail();
-  
+
     if (isFirstNameValid && isEmailValid) {
       // Save data to AsyncStorage if needed
       try {
@@ -51,7 +52,10 @@ const validateEmail = () => {
       } catch (error) {
         console.error('Error saving data:', error);
       }
-  
+
+      // Update the firstName in the App.js component using the provided callback
+      updateFirstName(firstName);
+
       // Navigate to the Home screen
       navigation.reset({
         index: 0,
@@ -59,9 +63,9 @@ const validateEmail = () => {
       });
     }
   };
-  
-  
-  
+
+
+
 
   return (
     <View style={styles.container}>
@@ -118,7 +122,7 @@ const styles = StyleSheet.create({
   logo: {
     marginTop: 20,
     resizeMode: 'contain',
-    width: 250, 
+    width: 250,
     height: 100,
   },
   heading: {
@@ -127,7 +131,7 @@ const styles = StyleSheet.create({
   headingText: {
     fontSize: 30,
     color: '#F4CE14',
-    marginTop:20,
+    marginTop: 20,
   },
   input: {
     margin: 10,

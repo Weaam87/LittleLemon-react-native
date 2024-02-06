@@ -50,15 +50,12 @@ export default function App() {
   }, []); // Empty dependency array to run once on mount
 
 
-  // Save the provided image URI to AsyncStorage
+  // Save the user's profile image URI to AsyncStorage
   const saveProfileImage = async (imageUri) => {
     try {
-      if (imageUri) {
-        await AsyncStorage.setItem('profileImage', imageUri);
-      } else {
-        await AsyncStorage.removeItem('profileImage');
-      }
+      await AsyncStorage.setItem('profileImage', imageUri || ''); // Use empty string if imageUri is falsy
     } catch (error) {
+      // Handle any errors that may occur during the AsyncStorage operations
       console.error('Error saving profile image:', error);
     }
   };

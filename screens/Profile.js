@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -21,6 +21,9 @@ export default function ProfileScreen({ updateProfileImage }) {
 
       // Set onboardingCompleted to false
       await AsyncStorage.setItem('@onboardingCompleted', 'false');
+
+      // Update the profile image in App.js using the provided callback
+      updateProfileImage(null);
 
       // Reset navigation stack and navigate to the Welcome screen
       navigation.reset({
@@ -84,7 +87,7 @@ export default function ProfileScreen({ updateProfileImage }) {
             },
           },
         ],
-        { cancelable: false }
+        { cancelable: true }
       );
     } else {
       // Display a message to the user that there is no profile image to remove
@@ -116,19 +119,24 @@ export default function ProfileScreen({ updateProfileImage }) {
     fetchUserData();
   }, []); // Empty dependency array ensures useEffect runs only once, similar to componentDidMount
 
-  // Display loading message based on the loading state
+  // Display loading indicator based on the loading state
   if (loading) {
-    return <Text style={styles.loading}>Loading...</Text>;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#495E57" />
+      </View>
+    );
   }
   return (
     <View style={styles.container}>
+      <Text style={styles.text}>Personal information</Text>
       <View style={styles.rowContainer}>
         <View style={styles.imageContainer}>
           {/* Conditional rendering for profile image */}
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
-            <Image source={require('../assets/profile_icon.png')} style={styles.profileImage} />
+            <Image source={require('../assets/profile_icon.png')} style={styles.placeholderImage} />
           )}
         </View>
         <View style={styles.buttonsContainer}>
@@ -141,7 +149,6 @@ export default function ProfileScreen({ updateProfileImage }) {
         </View>
       </View>
 
-      <Text style={styles.text}>Personal information</Text>
       <Text style={styles.label}>First Name:</Text>
       <View style={styles.rectangularFrame}>
         <Text style={styles.data}>{firstName}</Text>
@@ -163,35 +170,39 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start', // Align items to the left
     justifyContent: 'flex-start', // Align content at the top
-    padding: 16, // Add padding for spacing
+    padding: 8, // Add padding for spacing
   },
-  loading: {
+  loadingContainer: {
     flex: 1,
-    padding: 16,
-    fontSize: 48,
-    color: '#333333',
-    marginVertical: 8,
-    fontWeight: 'bold',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 8,
   },
   imageContainer: {
     marginRight: 20,
     width: 100,
-    height: 100,
+    height: 120,
   },
   profileImage: {
     resizeMode: 'center',
     borderRadius: 50,
     width: 100,
-    height: 100, // Ensure the image takes the full height of the container
+    height: 100,
+  },
+  placeholderImage: {
+    resizeMode: 'contain',
+    borderRadius: 50,
+    width: '90%',
+    height: '100%',
   },
   label: {
     fontSize: 18,
     color: '#495E57',
-    marginVertical: 8,
+    marginHorizontal: 8,
   },
   data: {
     fontSize: 16,
@@ -203,13 +214,14 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginVertical: 8,
     fontWeight: 'bold',
+    paddingLeft: 8,
   },
   rectangularFrame: {
-    width: '100%',
-    paddingHorizontal: 8,
+    width: '95%',
     borderColor: '#333333',
     borderWidth: 1,
     borderRadius: 8,
+    margin: 8,
   },
   buttonsContainer: {
     flexDirection: 'row',

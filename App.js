@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, TouchableOpacity, Alert, Text } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
 import LittleLemonOnboarding from './screens/Onboarding';
 import HomeScreen from './screens/HomeScreen';
 import SplashScreen from './screens/SplashScreen';
@@ -6,7 +6,6 @@ import ProfileScreen from './screens/Profile';
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
@@ -20,6 +19,12 @@ export default function App() {
   const updateFirstName = async (newFirstName) => {
     // Set the new first name in the component's state
     setFirstName(newFirstName);
+  };
+
+  // Update the profile image asynchronously
+  const updateProfileImage = async (newProfileImage) => {
+    // Set the new first name in the component's state
+    setProfileImage(newProfileImage);
   };
 
   useEffect(() => {
@@ -50,69 +55,6 @@ export default function App() {
   }, []); // Empty dependency array to run once on mount
 
 
-  // Save the user's profile image URI to AsyncStorage
-  const saveProfileImage = async (imageUri) => {
-    try {
-      await AsyncStorage.setItem('profileImage', imageUri || ''); // Use empty string if imageUri is falsy
-    } catch (error) {
-      // Handle any errors that may occur during the AsyncStorage operations
-      console.error('Error saving profile image:', error);
-    }
-  };
-
-  // Launch the image picker and update the profile image if an image is chosen
-  const pickImage = async () => {
-    // Check if the user already has a profile image
-    if (profileImage) {
-      // Display a confirmation dialog before proceeding
-      Alert.alert(
-        'Delete Profile Image',
-        'Are you sure you want to delete your profile image?',
-        [
-          {
-            text: 'Cancel',
-          },
-          {
-            text: 'Delete',
-            onPress: async () => {
-              let result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [1, 1],
-                quality: 1,
-              });
-
-              if (!result.canceled) {
-                // If a new image is chosen, update the profile image and save it to AsyncStorage
-                setProfileImage(result.assets[0].uri);
-                saveProfileImage(result.assets[0].uri);
-              } else {
-                // If the user cancels and chooses to delete the image, set the default image
-                setProfileImage(null);
-                saveProfileImage(null);
-              }
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    } else {
-      // If the user doesn't have a profile image, proceed with choosing a new image
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        // If a new image is chosen, update the profile image and save it to AsyncStorage
-        setProfileImage(result.assets[0].uri);
-        saveProfileImage(result.assets[0].uri);
-      }
-    }
-  };
-
   return (
     <NavigationContainer>
       {isLoading ? (
@@ -137,7 +79,6 @@ export default function App() {
 
             <Stack.Screen
               name="Profile"
-              component={ProfileScreen}
               options={({ navigation }) => ({
                 headerTitle: () => (
                   <Image
@@ -150,20 +91,16 @@ export default function App() {
                   <View style={styles.headerContainer}>
                     {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
                     {profileImage ? (
-                      <TouchableOpacity onPress={pickImage}>
-                        <Image
-                          source={{ uri: profileImage }}
-                          style={styles.profileImage}
-                        />
-                      </TouchableOpacity>
+                      <Image
+                        source={{ uri: profileImage }}
+                        style={styles.profileImage}
+                      />
                     ) : (
-                      <TouchableOpacity onPress={pickImage}>
-                        <View style={styles.profileImage}>
-                          <Text style={styles.imageText}>
-                            {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
+                      <View style={styles.profileImage}>
+                        <Text style={styles.imageText}>
+                          {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
+                        </Text>
+                      </View>
                     )}
                   </View>
                 ),
@@ -181,8 +118,10 @@ export default function App() {
                 ),
                 headerBackVisible: false, // This will hide the default back button
               })}
-            />
-
+            >
+              {/* UpdateProfileImage: Callback function to update the profile image in App.js state*/}
+              {props => <ProfileScreen {...props} updateProfileImage={updateProfileImage} />}
+            </Stack.Screen>
           </Stack.Navigator>
         </View>
       )}

@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ updateProfileImage }) {
   const navigation = useNavigation();
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,7 +45,6 @@ export default function ProfileScreen() {
 
   // Launch the image picker and update the profile image if an image is chosen
   const pickImage = async () => {
-    // If the user doesn't have a profile image, proceed with choosing a new image
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -57,10 +56,13 @@ export default function ProfileScreen() {
       // If a new image is chosen, update the profile image and save it to AsyncStorage
       setProfileImage(result.assets[0].uri);
       saveProfileImage(result.assets[0].uri);
+      // Update the profile image in App.js using the provided callback
+      updateProfileImage(result.assets[0].uri);
     }
   };
 
-  const handleRemoveImage = () => {
+
+  const handleRemoveImage = async () => {
     if (profileImage) {
       Alert.alert(
         'Remove Image',
@@ -77,13 +79,19 @@ export default function ProfileScreen() {
               setProfileImage(null);
               // Remove the profile image from AsyncStorage
               await AsyncStorage.removeItem('profileImage');
+              // Update the profile image in App.js using the provided callback
+              updateProfileImage(null);
             },
           },
         ],
         { cancelable: false }
       );
+    } else {
+      // Display a message to the user that there is no profile image to remove
+      Alert.alert('No Profile Image', 'There is no profile image to remove.');
     }
   };
+
 
   useEffect(() => {
     // Fetch the user data from AsyncStorage

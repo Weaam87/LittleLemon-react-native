@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,6 +10,11 @@ export default function ProfileScreen({ updateProfileImage }) {
   const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isEditingPhoneNumber, setIsEditingPhoneNumber] = useState(false);
+  const [isNewPhoneNumber, setIsNewPhoneNumber] = useState(false);
+
+
 
   const handleTextPress = async () => {
     try {
@@ -18,6 +23,8 @@ export default function ProfileScreen({ updateProfileImage }) {
       await AsyncStorage.removeItem('@userEmail');
       // Remove profile image data
       await AsyncStorage.removeItem('profileImage');
+      // Remove phone number data
+      await AsyncStorage.removeItem('@userPhoneNumber');
 
       // Set onboardingCompleted to false
       await AsyncStorage.setItem('@onboardingCompleted', 'false');
@@ -95,6 +102,112 @@ export default function ProfileScreen({ updateProfileImage }) {
     }
   };
 
+  // Save the user's phone number to AsyncStorage
+  const savePhoneNumber = async (phoneNumber) => {
+    try {
+      await AsyncStorage.setItem('@userPhoneNumber', phoneNumber || '');
+    } catch (error) {
+      console.error('Error saving phone number:', error);
+    }
+  };
+
+  const handlePhoneNumberChange = (text) => {
+    setPhoneNumber(text);
+    setIsNewPhoneNumber(true); // Set to true when the user starts entering a new phone number
+  };
+
+  const handleEditPhoneNumber = () => {
+    setIsEditingPhoneNumber(true);
+    setIsNewPhoneNumber(false); // Set to false when the user starts editing an existing phone number
+  };
+
+  const handleSavePhoneNumber = () => {
+    // Check if the phone number is null or contains non-numeric characters
+    if (phoneNumber == null || !/^\d+$/.test(phoneNumber)) {
+      // Display an alert notifying the user
+      Alert.alert('Error', 'Please enter a valid numeric phone number before saving.');
+      return;
+    }
+
+    // Check if the phone number meets the minimum length requirement
+    if (phoneNumber.length < 6) {
+      // Display an alert notifying the user
+      Alert.alert('Error', 'Please enter a phone number with a minimum length of 6 digits.');
+      return;
+    }
+
+    // Check if the phone number meets the maximum length requirement
+    if (phoneNumber.length > 15) {
+      // Display an alert notifying the user
+      Alert.alert('Error', 'Please enter a phone number with a maximum length of 15 digits.');
+      return;
+    }
+
+    // Save phone number to AsyncStorage
+    savePhoneNumber(phoneNumber);
+    setIsEditingPhoneNumber(false);
+    setIsNewPhoneNumber(false);
+  };
+
+
+  const handleDeletePhoneNumber = async () => {
+    Alert.alert(
+      'Delete Phone Number',
+      'Are you sure you want to delete your phone number?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: async () => {
+            // Remove the phone number from AsyncStorage
+            await AsyncStorage.removeItem('@userPhoneNumber');
+            setPhoneNumber('');
+
+            // Check if the phone number is deleted, then hide the delete button
+            setIsEditingPhoneNumber(false);
+            setIsNewPhoneNumber(true);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+// Function to render the buttons based on isNewPhoneNumber and isEditingPhoneNumber states
+const renderPhoneNumberButtons = () => {
+  // Check if it's a new phone number
+  if (isNewPhoneNumber) {
+    // Render the button to save or edit the phone number
+    return (
+      <TouchableOpacity style={styles.changeButton} onPress={handleSavePhoneNumber}>
+        <Text style={styles.changeButtonText}>
+          {isEditingPhoneNumber ? 'Save Phone Number' : 'Add Phone Number'}
+        </Text>
+      </TouchableOpacity>
+    );
+  } else {
+    // Render buttons for editing and deleting existing phone number
+    return (
+      <>
+        <TouchableOpacity style={styles.changeButton} onPress={handleEditPhoneNumber}>
+          <Text style={styles.changeButtonText}>
+            {phoneNumber ? 'Edit Phone Number' : 'Add Phone Number'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Render the "Delete Phone Number" button only if editing an existing phone number */}
+        {isEditingPhoneNumber && (
+          <TouchableOpacity style={styles.removeButton} onPress={handleDeletePhoneNumber}>
+            <Text style={styles.removeButtonText}>Delete Phone Number</Text>
+          </TouchableOpacity>
+        )}
+      </>
+    );
+  }
+};
 
   useEffect(() => {
     // Fetch the user data from AsyncStorage
@@ -103,11 +216,16 @@ export default function ProfileScreen({ updateProfileImage }) {
         const storedFirstName = await AsyncStorage.getItem('@userFirstName');
         const storedEmail = await AsyncStorage.getItem('@userEmail');
         const storedProfileImage = await AsyncStorage.getItem('profileImage');
+        const storedPhoneNumber = await AsyncStorage.getItem('@userPhoneNumber');
 
         // Set the state with the retrieved data
         setFirstName(storedFirstName);
         setEmail(storedEmail);
         setProfileImage(storedProfileImage); // Set the profile image from AsyncStorage
+        setPhoneNumber(storedPhoneNumber); // Set the phone number from AsyncStorage
+
+        // Set isNewPhoneNumber to true if there is no existing phone number
+        setIsNewPhoneNumber(!storedPhoneNumber);
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
@@ -118,6 +236,7 @@ export default function ProfileScreen({ updateProfileImage }) {
     // Call the function to fetch user data
     fetchUserData();
   }, []); // Empty dependency array ensures useEffect runs only once, similar to componentDidMount
+
 
   // Display loading indicator based on the loading state
   if (loading) {
@@ -141,7 +260,9 @@ export default function ProfileScreen({ updateProfileImage }) {
         </View>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.changeButton} onPress={pickImage}>
-            <Text style={styles.changeButtonText}>Change</Text>
+            <Text style={styles.changeButtonText}>
+              {profileImage ? 'Change' : 'Add Image'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.removeButton} onPress={handleRemoveImage}>
             <Text style={styles.removeButtonText}>Remove</Text>
@@ -158,6 +279,21 @@ export default function ProfileScreen({ updateProfileImage }) {
         <Text style={styles.data}>{email}</Text>
       </View>
 
+      <Text style={styles.label}>Phone Number:</Text>
+      <View style={styles.rectangularFrame}>
+        <TextInput
+          style={styles.data}
+          value={phoneNumber}
+          onChangeText={handlePhoneNumberChange}
+          placeholder="Enter phone number"
+          keyboardType="numeric" // Accepts only numeric input
+          editable={isNewPhoneNumber || isEditingPhoneNumber || phoneNumber === ''}
+        // Make TextInput editable in new number entry, editing mode, or when the phone number is empty
+        />
+      </View>
+
+      <View style={styles.buttonsContainer}>{renderPhoneNumberButtons()}</View>
+      
       <TouchableOpacity onPress={handleTextPress}>
         <Text style={styles.text}>Press me to reset onboarding</Text>
       </TouchableOpacity>
@@ -230,7 +366,7 @@ const styles = StyleSheet.create({
   changeButton: {
     backgroundColor: '#495E57',
     padding: 10,
-    marginRight: 20,
+    marginRight: 24,
     borderRadius: 10,
   },
   removeButton: {

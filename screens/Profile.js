@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicat
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import Checkbox from 'expo-checkbox';
 
 export default function ProfileScreen({ updateProfileImage }) {
   const navigation = useNavigation();
@@ -13,34 +14,105 @@ export default function ProfileScreen({ updateProfileImage }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isEditingPhoneNumber, setIsEditingPhoneNumber] = useState(false);
   const [isNewPhoneNumber, setIsNewPhoneNumber] = useState(false);
+  const [specialOffers, setSpecialOffers] = useState(false);
+  const [passwordChanges, setPasswordChanges] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
 
-
-
-  const handleTextPress = async () => {
+  // Function to save checkbox status to AsyncStorage
+  const saveCheckboxStatus = async (key, value) => {
     try {
-      // Remove user data from AsyncStorage
-      await AsyncStorage.removeItem('@userFirstName');
-      await AsyncStorage.removeItem('@userEmail');
-      // Remove profile image data
-      await AsyncStorage.removeItem('profileImage');
-      // Remove phone number data
-      await AsyncStorage.removeItem('@userPhoneNumber');
+      await AsyncStorage.setItem(key, value.toString());
+    } catch (error) {
+      console.error(`Error saving ${key} status:`, error);
+    }
+  };
 
-      // Set onboardingCompleted to false
-      await AsyncStorage.setItem('@onboardingCompleted', 'false');
 
-      // Update the profile image in App.js using the provided callback
-      updateProfileImage(null);
+  // Function to handle checkbox press
+  const handleCheckboxPress = (key, value, setter) => {
+    setter(value); // Update state
+    saveCheckboxStatus(key, value); // Save status to AsyncStorage
+  };
 
-      // Reset navigation stack and navigate to the Welcome screen
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Welcome' }],
-      });
+  // JSX for checkboxes
+  const renderCheckboxes = () => (
+    <View style={styles.checkboxesContainer}>
+      <View style={styles.checkboxContainer}>
+        <Checkbox
+          value={specialOffers}
+          onValueChange={(value) => handleCheckboxPress('specialOffers', value, setSpecialOffers)}
+          color="#495E57"  // Background color when checked
+        />
+        <Text style={styles.label}>Special Offers</Text>
+      </View>
+      <View style={styles.checkboxContainer}>
+        <Checkbox
+          value={passwordChanges}
+          onValueChange={(value) => handleCheckboxPress('passwordChanges', value, setPasswordChanges)}
+          color="#495E57"  // Background color when checked
+        />
+        <Text style={styles.label}>Password Changes</Text>
+      </View>
+      <View style={styles.checkboxContainer}>
+        <Checkbox
+          value={newsletter}
+          onValueChange={(value) => handleCheckboxPress('newsletter', value, setNewsletter)}
+          color="#495E57"  // Background color when checked
+        />
+        <Text style={styles.label}>Newsletter</Text>
+      </View>
+    </View>
+  );
+
+  const logOut = async () => {
+    try {
+      // Display a confirmation alert
+      Alert.alert(
+        'Confirm Log Out',
+        'Are you sure you want to log out?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Log Out',
+            onPress: async () => {
+              // Specify the keys to be removed
+              const keysToRemove = [
+                '@userFirstName',
+                '@userEmail',
+                'profileImage',
+                '@userPhoneNumber',
+                'specialOffers',
+                'passwordChanges',
+                'newsletter',
+              ];
+
+              // Remove multiple items from AsyncStorage
+              await AsyncStorage.multiRemove(keysToRemove);
+
+              // Set onboardingCompleted to false
+              await AsyncStorage.setItem('@onboardingCompleted', 'false');
+
+              // Update the profile image in App.js using the provided callback
+              updateProfileImage(null);
+
+              // Reset navigation stack and navigate to the Welcome screen
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+              });
+            },
+          },
+        ],
+        { cancelable: true }
+      );
     } catch (error) {
       console.error('Error resetting onboarding:', error);
     }
   };
+
 
   // Save the user's profile image URI to AsyncStorage
   const saveProfileImage = async (imageUri) => {
@@ -221,12 +293,18 @@ export default function ProfileScreen({ updateProfileImage }) {
         const storedEmail = await AsyncStorage.getItem('@userEmail');
         const storedProfileImage = await AsyncStorage.getItem('profileImage');
         const storedPhoneNumber = await AsyncStorage.getItem('@userPhoneNumber');
+        const storedSpecialOffers = await AsyncStorage.getItem('specialOffers');
+        const storedPasswordChanges = await AsyncStorage.getItem('passwordChanges');
+        const storedNewsletter = await AsyncStorage.getItem('newsletter');
 
         // Set the state with the retrieved data
         setFirstName(storedFirstName);
         setEmail(storedEmail);
-        setProfileImage(storedProfileImage); // Set the profile image from AsyncStorage
-        setPhoneNumber(storedPhoneNumber); // Set the phone number from AsyncStorage
+        setProfileImage(storedProfileImage);
+        setPhoneNumber(storedPhoneNumber);
+        setSpecialOffers(storedSpecialOffers === 'true'); // Convert string to boolean
+        setPasswordChanges(storedPasswordChanges === 'true');
+        setNewsletter(storedNewsletter === 'true');
 
         // Set isNewPhoneNumber to true if there is no existing phone number
         setIsNewPhoneNumber(!storedPhoneNumber);
@@ -239,7 +317,7 @@ export default function ProfileScreen({ updateProfileImage }) {
 
     // Call the function to fetch user data
     fetchUserData();
-  }, []); // Empty dependency array ensures useEffect runs only once, similar to componentDidMount
+  }, []); // Empty dependency array ensures useEffect runs only once
 
 
   // Display loading indicator based on the loading state
@@ -252,8 +330,11 @@ export default function ProfileScreen({ updateProfileImage }) {
   }
   return (
     <View style={styles.container}>
+
       <Text style={styles.text}>Personal information</Text>
+
       <View style={styles.rowContainer}>
+
         <View style={styles.imageContainer}>
           {/* Conditional rendering for profile image */}
           {profileImage ? (
@@ -262,28 +343,35 @@ export default function ProfileScreen({ updateProfileImage }) {
             <Image source={require('../assets/profile_icon.png')} style={styles.placeholderImage} />
           )}
         </View>
+
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.changeButton} onPress={pickImage}>
             <Text style={styles.changeButtonText}>
               {profileImage ? 'Change' : 'Add Image'}
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.removeButton} onPress={handleRemoveImage}>
             <Text style={styles.removeButtonText}>Remove</Text>
           </TouchableOpacity>
         </View>
+
       </View>
 
       <Text style={styles.label}>First Name:</Text>
+
       <View style={styles.rectangularFrame}>
         <Text style={styles.data}>{firstName}</Text>
       </View>
+
       <Text style={styles.label}>Email:</Text>
+
       <View style={styles.rectangularFrame}>
         <Text style={styles.data}>{email}</Text>
       </View>
 
       <Text style={styles.label}>Phone Number:</Text>
+
       <View style={styles.rectangularFrame}>
         <TextInput
           style={styles.data}
@@ -298,9 +386,14 @@ export default function ProfileScreen({ updateProfileImage }) {
 
       <View style={styles.buttonsContainer}>{renderPhoneNumberButtons()}</View>
 
-      <TouchableOpacity onPress={handleTextPress}>
-        <Text style={styles.text}>Press me to reset onboarding</Text>
+      <Text style={styles.text}>Email notifications</Text>
+
+      {renderCheckboxes()}
+
+      <TouchableOpacity style={styles.logOutButton} onPress={logOut}>
+        <Text style={styles.logOutTextButton}>Log out</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -308,9 +401,7 @@ export default function ProfileScreen({ updateProfileImage }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'flex-start', // Align items to the left
-    justifyContent: 'flex-start', // Align content at the top
-    padding: 8, // Add padding for spacing
+    margin: 8,
   },
   loadingContainer: {
     flex: 1,
@@ -320,7 +411,7 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
+    marginLeft: 8,
   },
   imageContainer: {
     marginRight: 20,
@@ -342,7 +433,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     color: '#495E57',
-    marginHorizontal: 8,
+    marginLeft: 8,
   },
   data: {
     fontSize: 16,
@@ -374,14 +465,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   removeButton: {
-    borderColor: '#F4CE14',
+    borderColor: '#495E57',
     borderWidth: 1,
     padding: 10,
     marginLeft: 5,
     borderRadius: 10,
   },
   changeButtonText: {
-    color: '#F4CE14',
+    color: 'white',
     textAlign: 'center',
     margin: 4,
   },
@@ -389,5 +480,29 @@ const styles = StyleSheet.create({
     color: '#495E57',
     textAlign: 'center',
     margin: 4,
+  },
+  checkboxesContainer: {
+    flexDirection: 'column',
+    margin: 8,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  logOutButton: {
+    backgroundColor: '#F4CE14',
+    width: '95%',
+    height: 36,
+    borderRadius: 10,
+    marginLeft: 8,
+  },
+  logOutTextButton: {
+    color: '#333333',
+    textAlign: 'center',
+    margin: 4,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

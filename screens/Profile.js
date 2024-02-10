@@ -176,38 +176,42 @@ export default function ProfileScreen({ updateProfileImage }) {
     );
   };
 
-// Function to render the buttons based on isNewPhoneNumber and isEditingPhoneNumber states
-const renderPhoneNumberButtons = () => {
-  // Check if it's a new phone number
-  if (isNewPhoneNumber) {
-    // Render the button to save or edit the phone number
-    return (
-      <TouchableOpacity style={styles.changeButton} onPress={handleSavePhoneNumber}>
-        <Text style={styles.changeButtonText}>
-          {isEditingPhoneNumber ? 'Save Phone Number' : 'Add Phone Number'}
-        </Text>
-      </TouchableOpacity>
-    );
-  } else {
-    // Render buttons for editing and deleting existing phone number
-    return (
-      <>
-        <TouchableOpacity style={styles.changeButton} onPress={handleEditPhoneNumber}>
+  // Function to render the buttons based on isNewPhoneNumber and isEditingPhoneNumber states
+  const renderPhoneNumberButtons = () => {
+    // Check if it's a new phone number and the user has started entering a new phone number
+    if (isNewPhoneNumber && phoneNumber?.length > 0) {
+      // Render the button to save or edit the phone number
+      return (
+        <TouchableOpacity style={styles.changeButton} onPress={handleSavePhoneNumber}>
           <Text style={styles.changeButtonText}>
-            {phoneNumber ? 'Edit Phone Number' : 'Add Phone Number'}
+            {isEditingPhoneNumber ? 'Save Phone Number' : 'Add Phone Number'}
           </Text>
         </TouchableOpacity>
-
-        {/* Render the "Delete Phone Number" button only if editing an existing phone number */}
-        {isEditingPhoneNumber && (
-          <TouchableOpacity style={styles.removeButton} onPress={handleDeletePhoneNumber}>
-            <Text style={styles.removeButtonText}>Delete Phone Number</Text>
+      );
+    } else if (!isNewPhoneNumber) {
+      // Render buttons for editing and deleting existing phone number
+      return (
+        <>
+          <TouchableOpacity style={styles.changeButton} onPress={handleEditPhoneNumber}>
+            <Text style={styles.changeButtonText}>
+              {phoneNumber ? 'Edit Phone Number' : 'Add Phone Number'}
+            </Text>
           </TouchableOpacity>
-        )}
-      </>
-    );
-  }
-};
+
+          {/* Render the "Delete Phone Number" button only if editing an existing phone number */}
+          {isEditingPhoneNumber && (
+            <TouchableOpacity style={styles.removeButton} onPress={handleDeletePhoneNumber}>
+              <Text style={styles.removeButtonText}>Delete Phone Number</Text>
+            </TouchableOpacity>
+          )}
+        </>
+      );
+    }
+
+    // Return null if it's a new phone number, and the user has not started entering a new number
+    return null;
+  };
+
 
   useEffect(() => {
     // Fetch the user data from AsyncStorage
@@ -293,7 +297,7 @@ const renderPhoneNumberButtons = () => {
       </View>
 
       <View style={styles.buttonsContainer}>{renderPhoneNumberButtons()}</View>
-      
+
       <TouchableOpacity onPress={handleTextPress}>
         <Text style={styles.text}>Press me to reset onboarding</Text>
       </TouchableOpacity>

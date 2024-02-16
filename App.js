@@ -27,6 +27,37 @@ export default function App() {
     setProfileImage(newProfileImage);
   };
 
+  // Define common header options for Home and Profile screens
+  const commonHeaderOptions = ({ navigation }) => ({
+    headerTitle: () => (
+      <Image
+        source={require('./assets/Logo.png')}
+        style={styles.logo}
+      />
+    ),
+    headerTitleAlign: 'center',
+    headerRight: () => (
+      <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        <View style={styles.headerContainer}>
+          {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
+          {profileImage ? (
+            <Image
+              source={{ uri: profileImage }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <View style={styles.profileImage}>
+              <Text style={styles.imageText}>
+                {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
+              </Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    ),
+    headerBackVisible: false,
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,62 +109,13 @@ export default function App() {
             <Stack.Screen
               name="Home"
               component={HomeScreen}
-              options={{
-                headerTitle: () => (
-                  <Image
-                    source={require('./assets/Logo.png')}
-                    style={styles.logo}
-                  />
-                ),
-                headerTitleAlign: 'center',
-                headerRight: () => (
-                  <View style={styles.headerContainer}>
-                    {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
-                    {profileImage ? (
-                      <Image
-                        source={{ uri: profileImage }}
-                        style={styles.profileImage}
-                      />
-                    ) : (
-                      <View style={styles.profileImage}>
-                        <Text style={styles.imageText}>
-                          {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ),
-                headerBackVisible: false,
-              }}
+              options={commonHeaderOptions}
             />
 
             <Stack.Screen
               name="Profile"
               options={({ navigation }) => ({
-                headerTitle: () => (
-                  <Image
-                    source={require('./assets/Logo.png')}
-                    style={styles.logo}
-                  />
-                ),
-                headerTitleAlign: 'center',
-                headerRight: () => (
-                  <View style={styles.headerContainer}>
-                    {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
-                    {profileImage ? (
-                      <Image
-                        source={{ uri: profileImage }}
-                        style={styles.profileImage}
-                      />
-                    ) : (
-                      <View style={styles.profileImage}>
-                        <Text style={styles.imageText}>
-                          {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ),
+                ...commonHeaderOptions({ navigation }),
                 headerLeft: () => (
                   <TouchableOpacity onPress={() => navigation.goBack()}>
                     <View style={styles.headerContainer}>
@@ -146,12 +128,11 @@ export default function App() {
                     </View>
                   </TouchableOpacity>
                 ),
-                headerBackVisible: false, // This will hide the default back button
               })}
             >
-              {/* UpdateProfileImage: Callback function to update the profile image in App.js state*/}
               {props => <ProfileScreen {...props} updateProfileImage={updateProfileImage} />}
             </Stack.Screen>
+
           </Stack.Navigator>
         </View>
       )}

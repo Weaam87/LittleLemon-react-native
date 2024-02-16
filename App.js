@@ -75,7 +75,37 @@ export default function App() {
               {(props) => <LittleLemonOnboarding {...props} updateFirstName={updateFirstName} />}
             </Stack.Screen>
 
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    source={require('./assets/Logo.png')}
+                    style={styles.logo}
+                  />
+                ),
+                headerTitleAlign: 'center',
+                headerRight: () => (
+                  <View style={styles.headerContainer}>
+                    {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
+                    {profileImage ? (
+                      <Image
+                        source={{ uri: profileImage }}
+                        style={styles.profileImage}
+                      />
+                    ) : (
+                      <View style={styles.profileImage}>
+                        <Text style={styles.imageText}>
+                          {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ),
+                headerBackVisible: false,
+              }}
+            />
 
             <Stack.Screen
               name="Profile"

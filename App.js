@@ -28,7 +28,7 @@ export default function App() {
   };
 
   // Define common header options for Home and Profile screens
-  const commonHeaderOptions = ({ navigation }) => ({
+  const commonHeaderOptions = ({ navigation, route }) => ({
     headerTitle: () => (
       <Image
         source={require('./assets/Logo.png')}
@@ -36,8 +36,30 @@ export default function App() {
       />
     ),
     headerTitleAlign: 'center',
-    headerRight: () => (
-      <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+    headerRight: () => {
+      if (route.name === 'Home') {
+        // Render touchable component only for HomeScreen
+        return (
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <View style={styles.headerContainer}>
+              {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
+              {profileImage ? (
+                <Image
+                  source={{ uri: profileImage }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <View style={styles.profileImage}>
+                  <Text style={styles.imageText}>
+                    {firstName ? firstName.charAt(0) + (firstName.length > 1 ? firstName.charAt(1) : '') : 'NN'}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        );
+      }
+      return (
         <View style={styles.headerContainer}>
           {/* Display profile image if available, otherwise show the first and second letters of the user's first name */}
           {profileImage ? (
@@ -53,8 +75,8 @@ export default function App() {
             </View>
           )}
         </View>
-      </TouchableOpacity>
-    ),
+      )
+    },
     headerBackVisible: false,
   });
 
@@ -109,13 +131,13 @@ export default function App() {
             <Stack.Screen
               name="Home"
               component={HomeScreen}
-              options={commonHeaderOptions}
+              options={({ navigation, route }) => commonHeaderOptions({ navigation, route })}
             />
 
             <Stack.Screen
               name="Profile"
-              options={({ navigation }) => ({
-                ...commonHeaderOptions({ navigation }),
+              options={({ navigation, route }) => ({
+                ...commonHeaderOptions({ navigation, route }),
                 headerLeft: () => (
                   <TouchableOpacity onPress={() => navigation.goBack()}>
                     <View style={styles.headerContainer}>

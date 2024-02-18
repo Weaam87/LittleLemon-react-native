@@ -1,5 +1,6 @@
 import { View, StyleSheet, SafeAreaView, Text, ActivityIndicator, Image, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { initDatabase, insertMenuData, getMenuDataFromDatabase } from './database';
 
 export default function HomeScreen() {
 
@@ -11,13 +12,30 @@ export default function HomeScreen() {
     try {
       const response = await fetch('https://raw.githubusercontent.com/Weaam87/App-capstone-data/main/menu.json');
       const data = await response.json();
-      setMenuData(data.menu); // Access the 'menu' array in the JSON
+      setMenuData(data.menu);
+      insertMenuData(data.menu); // Store data in the SQLite database
     } catch (error) {
       console.error('Error fetching menu data:', error);
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchMenuData(); }, []);
+  useEffect(() => {
+    // Initialize the database on component mount
+    initDatabase();
+
+    // Fetch menu data from the remote server if the database is empty
+    getMenuDataFromDatabase((data) => {
+      if (data.length === 0) {
+        fetchMenuData();
+      } else {
+        setMenuData(data);
+        setLoading(false);
+        console.log('Data from SQLite Database:', data);
+      }
+    });
+  }, []);
 
   const Item = ({ title, price, description, image }) => (
     <View style={styles.rectangularFrame}>
@@ -50,7 +68,7 @@ export default function HomeScreen() {
       ) : (
         <View>
           <FlatList data={menuData}
-            keyExtractor={({ id }) => id}
+            keyExtractor={({ id }) => id.toString()}
             renderItem={renderItem} />
         </View>
       )}
@@ -60,8 +78,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
-    padding: 16,
+    padding: 8,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,

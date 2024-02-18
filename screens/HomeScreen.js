@@ -1,6 +1,6 @@
 import { View, StyleSheet, SafeAreaView, Text, ActivityIndicator, Image, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { initDatabase, insertMenuData, getMenuDataFromDatabase } from './database';
+import { initDatabase, insertMenuData, getMenuDataFromDatabase } from '../database';
 
 export default function HomeScreen() {
 

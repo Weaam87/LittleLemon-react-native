@@ -8,7 +8,7 @@ const initDatabase = () => {
     db.transaction((tx) => {
         // Create the 'menu' table if it doesn't exist
         tx.executeSql(
-            'CREATE TABLE IF NOT EXISTS menu (id integer primary key not null, title text, price text, description text, image text);'
+            'CREATE TABLE IF NOT EXISTS menu (id integer primary key not null, title text, description text, price text, image text, category text);'
         );
     });
 };
@@ -18,8 +18,14 @@ const insertMenuData = (menuData) => {
     db.transaction((tx) => {
         menuData.forEach((item) => {
             tx.executeSql(
-                'INSERT INTO menu (title, price, description, image) values (?, ?, ?, ?);',
-                [item.title, item.price, item.description, item.image]
+                'INSERT INTO menu (id ,title, description, price, image, category) values (?, ?, ?, ?, ?, ?);',
+                [item.id, item.title, item.description, item.price, item.image, item.category],
+                (_, result) => {
+                    console.log('Data inserted into SQLite:', result.rowsAffected);
+                },
+                (_, error) => {
+                    console.error('Error inserting data into SQLite:', error);
+                }
             );
         });
     });
@@ -29,8 +35,8 @@ const insertMenuData = (menuData) => {
 const getMenuDataFromDatabase = (callback) => {
     db.transaction((tx) => {
         tx.executeSql(`SELECT * FROM menu;`, [], (_, { rows }) => {
-            // Convert the rows object to an array
             const data = rows._array;
+            console.log('Data from SQLite Database db file:', data);
             callback(data);
         });
     });

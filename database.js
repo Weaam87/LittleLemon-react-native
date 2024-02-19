@@ -36,4 +36,18 @@ const getMenuDataFromDatabase = (callback) => {
     });
 };
 
-export { initDatabase, insertMenuData, getMenuDataFromDatabase };
+// Function to delete all data from the 'menu' table
+const deleteAllMenuData = () => {
+    db.transaction((tx) => {
+        tx.executeSql('DELETE FROM menu;', [], (_, result) => {
+            // Handle success if needed
+            console.log('All data deleted successfully.');
+        },
+            (_, error) => {
+                // Handle error if needed
+                console.error('Error deleting data:', error);
+            });
+    });
+};
+
+export { initDatabase, insertMenuData, getMenuDataFromDatabase, deleteAllMenuData };

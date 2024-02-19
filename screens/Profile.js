@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import Checkbox from 'expo-checkbox';
+import { deleteAllMenuData } from '../database'
 
 export default function ProfileScreen({ updateProfileImage }) {
   const navigation = useNavigation();
@@ -97,6 +98,9 @@ export default function ProfileScreen({ updateProfileImage }) {
 
               // Update the profile image in App.js using the provided callback
               updateProfileImage(null);
+
+              // Delete all data from the 'menu' table
+              deleteAllMenuData();
 
               // Reset navigation stack and navigate to the Welcome screen
               navigation.reset({

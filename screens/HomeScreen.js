@@ -1,4 +1,4 @@
-import { View, StyleSheet, SafeAreaView, Text, ActivityIndicator, Image, FlatList } from 'react-native';
+import { View, StyleSheet, SafeAreaView, Text, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { initDatabase, insertMenuData, getMenuDataFromDatabase } from '../database';
 
@@ -6,6 +6,7 @@ export default function HomeScreen() {
 
   const [menuData, setMenuData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const fetchAndInsertMenuData = async () => {
     try {
@@ -47,6 +48,46 @@ export default function HomeScreen() {
     fetchData();
   }, []);
 
+  // Function to handle category button press
+  const handleCategoryPress = (category) => {
+    const lowerCaseCategory = category.toLowerCase();
+    // Check if the category is already selected
+    if (selectedCategories.includes(lowerCaseCategory)) {
+      // If selected, remove it from the list
+      setSelectedCategories((prevCategories) =>
+        prevCategories.filter((prevCategory) => prevCategory !== lowerCaseCategory)
+      );
+    } else {
+      // If not selected, add it to the list
+      setSelectedCategories((prevCategories) => [...prevCategories, lowerCaseCategory]);
+    }
+  };
+
+  // Function to render category filter button
+  const renderCategoryButton = (category) => (
+    <TouchableOpacity
+      key={category}
+      style={[
+        styles.categoryButton,
+        {
+          backgroundColor: selectedCategories.includes(category.toLowerCase())
+            ? '#495E57'
+            : 'white',
+        },
+      ]}
+      onPress={() => handleCategoryPress(category)}>
+      <Text
+        style={{
+          color: selectedCategories.includes(category.toLowerCase())
+            ? 'white'
+            : '#495E57',
+        }}>
+        {category}
+      </Text>
+    </TouchableOpacity>
+  );
+
+
   const Item = ({ title, price, description, image }) => (
     <View style={styles.rectangularFrame}>
       <View style={styles.menuItem}>
@@ -73,13 +114,28 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.categoryButtonsContainer}>
+        {renderCategoryButton('Starters')}
+        {renderCategoryButton('Desserts')}
+        {renderCategoryButton('Mains')}
+      </View>
       {loading ? (
         <ActivityIndicator size="large" color="#495E57" />
       ) : (
         <View>
-          <FlatList data={menuData}
+          {/*
+            - The 'data' prop is filtered based on selected categories. If no category is selected (length is 0),
+            display all items.
+          */}
+          <FlatList
+            data={menuData.filter((item) =>
+              selectedCategories.length === 0
+                ? true
+                : selectedCategories.includes(item.category.toLowerCase())
+            )}
             keyExtractor={({ id }) => id.toString()}
-            renderItem={renderItem} />
+            renderItem={renderItem}
+          />
         </View>
       )}
     </SafeAreaView>
@@ -130,5 +186,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 8,
     padding: 8,
+  },
+  categoryButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 8,
+  },
+  categoryButton: {
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#495E57',
   },
 });

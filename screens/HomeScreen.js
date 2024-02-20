@@ -135,6 +135,7 @@ export default function HomeScreen() {
             )}
             keyExtractor={({ id }) => id.toString()}
             renderItem={renderItem}
+            contentContainerStyle={styles.flatListContentContainer}
           />
         </View>
       )}
@@ -197,5 +198,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#495E57',
+  },
+  flatListContentContainer: {
+    paddingBottom: 90,
   },
 });

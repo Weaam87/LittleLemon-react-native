@@ -7,34 +7,44 @@ export default function HomeScreen() {
   const [menuData, setMenuData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
-  const fetchMenuData = async () => {
+  const fetchAndInsertMenuData = async () => {
     try {
       const response = await fetch('https://raw.githubusercontent.com/Weaam87/App-capstone-data/main/menu.json');
       const data = await response.json();
       setMenuData(data.menu);
-      insertMenuData(data.menu); // Store data in the SQLite database
+      await insertMenuData(data.menu); // Store data in the SQLite database
     } catch (error) {
-      console.error('Error fetching menu data:', error);
+      console.error('Error fetching or inserting menu data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Initialize the database on component mount
-    initDatabase();
+    const fetchData = async () => {
+      try {
+        // Initialize the database on component mount
+        await initDatabase();
 
-    // Fetch menu data from the remote server if the database is empty
-    getMenuDataFromDatabase((data) => {
-      if (data.length === 0) {
-        fetchMenuData();
-      } else {
-        setMenuData(data);
-        setLoading(false);
-        console.log('Data from SQLite Database:', data);
+        // Fetch menu data from the remote server if the database is empty
+        getMenuDataFromDatabase().then((data) => {
+          if (data.length === 0) {
+            return fetchAndInsertMenuData();
+          } else {
+            setMenuData(data);
+            setLoading(false);
+            console.log('Data from SQLite Database:', data);
+          }
+        })
+          .catch((error) => {
+            console.error('Error fetching data from the database:', error);
+          });
+      } catch (error) {
+        console.error('Error initializing database:', error);
       }
-    });
+    };
+
+    fetchData();
   }, []);
 
   const Item = ({ title, price, description, image }) => (

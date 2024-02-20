@@ -507,6 +507,5 @@ const styles = StyleSheet.create({
     margin: 4,
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
 });

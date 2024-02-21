@@ -79,19 +79,8 @@ export default function ProfileScreen({ updateProfileImage }) {
           {
             text: 'Log Out',
             onPress: async () => {
-              // Specify the keys to be removed
-              const keysToRemove = [
-                '@userFirstName',
-                '@userEmail',
-                'profileImage',
-                '@userPhoneNumber',
-                'specialOffers',
-                'passwordChanges',
-                'newsletter',
-              ];
-
-              // Remove multiple items from AsyncStorage
-              await AsyncStorage.multiRemove(keysToRemove);
+              // Remove all items from AsyncStorage
+              await AsyncStorage.clear();
 
               // Set onboardingCompleted to false
               await AsyncStorage.setItem('@onboardingCompleted', 'false');

@@ -1,12 +1,15 @@
-import { View, StyleSheet, SafeAreaView, Text, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, SafeAreaView, Text, ActivityIndicator, Image, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { initDatabase, insertMenuData, getMenuDataFromDatabase } from '../database';
+import { initDatabase, insertMenuData, getMenuDataFromDatabase, searchMenuData } from '../database';
 
 export default function HomeScreen() {
 
   const [menuData, setMenuData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [noResults, setNoResults] = useState(false);
+  const [noResultsMessage, setNoResultsMessage] = useState('');
 
   const fetchAndInsertMenuData = async () => {
     try {
@@ -112,8 +115,66 @@ export default function HomeScreen() {
     />
   );
 
+  // Function to handle search bar input and update menu data based on the search query
+  const handleSearch = async (query) => {
+    // Update searchQuery state with the user's input
+    setSearchQuery(query);
+
+    try {
+      if (query === '') {
+        // If the search query is empty, fetch and display the full menu
+        const fullMenuData = await getMenuDataFromDatabase();
+        setMenuData(fullMenuData);
+        setNoResults(false);
+        setNoResultsMessage('');
+      } else {
+        // If the search query is not empty, perform a search in the database based on the query
+        const searchData = await searchMenuData(query);
+        const filteredSearchData = searchData.filter((item) =>
+          selectedCategories.length === 0
+            ? true // If no categories selected, include all items in the search results
+            : selectedCategories.includes(item.category.toLowerCase()) // If categories are selected, 
+          // include items whose category matches any selected category
+        );
+
+        // Update menuData state with the filtered search results
+        setMenuData(filteredSearchData);
+
+        if (filteredSearchData.length === 0) {
+          // No results found
+          if (selectedCategories.length === 0) {
+            // No category selected
+            setNoResultsMessage(`No results found for "${query}"`);
+          } else {
+            // Category selected
+            const categoryNames = selectedCategories.join(', ');
+            setNoResultsMessage(`No results found for "${query}" in ${categoryNames} category`);
+          }
+          setNoResults(true);
+        } else {
+          // Results found
+          setNoResults(false);
+          setNoResultsMessage('');
+        }
+      }
+    } catch (error) {
+      // Log an error message if there's an issue with the search
+      console.error('Error searching data:', error);
+    }
+  };
+
+
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search..."
+          onChangeText={handleSearch}
+          value={searchQuery}
+        />
+      </View>
       <View style={styles.categoryButtonsContainer}>
         {renderCategoryButton('Starters')}
         {renderCategoryButton('Desserts')}
@@ -123,20 +184,24 @@ export default function HomeScreen() {
         <ActivityIndicator size="large" color="#495E57" />
       ) : (
         <View>
-          {/*
-            - The 'data' prop is filtered based on selected categories. If no category is selected (length is 0),
-            display all items.
-          */}
-          <FlatList
-            data={menuData.filter((item) =>
-              selectedCategories.length === 0
-                ? true
-                : selectedCategories.includes(item.category.toLowerCase())
-            )}
-            keyExtractor={({ id }) => id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.flatListContentContainer}
-          />
+          {/* Conditional rendering based on search results */}
+          {noResults ? (
+            <Text style={styles.noResultsText}>{noResultsMessage}</Text>
+          ) : (
+            // The 'data' prop is filtered based on selected categories. If no category is selected (length is 0),
+            // display all items.
+            <FlatList
+              data={menuData
+                .filter((item) =>
+                  selectedCategories.length === 0
+                    ? true
+                    : selectedCategories.includes(item.category.toLowerCase())
+                )}
+              keyExtractor={({ id }) => id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={styles.flatListContentContainer}
+            />
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -200,6 +265,23 @@ const styles = StyleSheet.create({
     borderColor: '#495E57',
   },
   flatListContentContainer: {
-    paddingBottom: 90,
+    paddingBottom: 200,
+  },
+  searchContainer: {
+    marginVertical: 8,
+    paddingHorizontal: 16,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#495E57',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+  },
+  noResultsText: {
+    textAlign: 'center',
+    marginTop: 16,
+    fontSize: 16,
+    color: '#495E57',
   },
 });

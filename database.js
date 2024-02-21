@@ -89,4 +89,30 @@ const deleteAllMenuData = () => {
     });
 };
 
-export { initDatabase, insertMenuData, getMenuDataFromDatabase, deleteAllMenuData };
+// Function to search menu items in the database based on title or description
+const searchMenuData = (query) => {
+    return new Promise((resolve, reject) => {
+        db.transaction(
+            // Transaction function to search menu data
+            (tx) => {
+                tx.executeSql(
+                    'SELECT * FROM menu WHERE LOWER(title) LIKE ? OR LOWER(description) LIKE ?;',
+                    [`%${query.toLowerCase()}%`, `%${query.toLowerCase()}%`],
+                    (_, { rows }) => {
+                        const data = rows._array;
+                        resolve(data);
+                    },
+                    // Error callback if search fails
+                    (_, error) => {
+                        console.error('Error searching data:', error);
+                        reject(error);
+                    }
+                );
+            },
+            // Transaction error handling
+            reject
+        );
+    });
+};
+
+export { initDatabase, insertMenuData, getMenuDataFromDatabase, deleteAllMenuData, searchMenuData };

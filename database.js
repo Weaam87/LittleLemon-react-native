@@ -91,13 +91,16 @@ const deleteAllMenuData = () => {
 
 // Function to search menu items in the database based on title or description
 const searchMenuData = (query) => {
+    // If the original query ends with a space, remove the last character; otherwise, use the original query
+    const cleanedQuery = query.endsWith(' ') ? query.slice(0, -1) : query;
+
     return new Promise((resolve, reject) => {
         db.transaction(
             // Transaction function to search menu data
             (tx) => {
                 tx.executeSql(
                     'SELECT * FROM menu WHERE LOWER(title) LIKE ? OR LOWER(description) LIKE ?;',
-                    [`%${query.toLowerCase()}%`, `%${query.toLowerCase()}%`],
+                    [`%${cleanedQuery.toLowerCase()}%`, `%${cleanedQuery.toLowerCase()}%`],
                     (_, { rows }) => {
                         const data = rows._array;
                         resolve(data);

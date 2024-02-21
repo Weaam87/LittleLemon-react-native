@@ -11,6 +11,32 @@ export default function HomeScreen() {
   const [noResults, setNoResults] = useState(false);
   const [noResultsMessage, setNoResultsMessage] = useState('');
 
+  const heroSection = () => {
+    return (
+      <View style={styles.heroSectionContainer}>
+        <View style={styles.heroTextsAndImageContainer}>
+          <View style={styles.heroTextsContainer}>
+            <Text style={styles.heroSectionTitle}>Little Lemon</Text>
+            <Text style={styles.heroSectionSubtitle}>Chicago</Text>
+            <Text style={styles.heroSectionDescription}>
+              We are a family-owned Mediterranean restaurant, focused on traditional
+              recipes served with a modern twist.
+            </Text>
+          </View>
+          <View style={styles.heroImageContainer}>
+            <Image source={require('../assets/hero.png')} style={styles.heroImage} />
+          </View>
+        </View>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search..."
+          onChangeText={handleSearch}
+          value={searchQuery}
+        />
+      </View>
+    );
+  };
+
   const fetchAndInsertMenuData = async () => {
     try {
       const response = await fetch('https://raw.githubusercontent.com/Weaam87/App-capstone-data/main/menu.json');
@@ -167,14 +193,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          onChangeText={handleSearch}
-          value={searchQuery}
-        />
-      </View>
+      {heroSection()}
       <View style={styles.categoryButtonsContainer}>
         {renderCategoryButton('Starters')}
         {renderCategoryButton('Desserts')}
@@ -256,7 +275,7 @@ const styles = StyleSheet.create({
   categoryButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 8,
+    marginVertical: 4,
   },
   categoryButton: {
     padding: 8,
@@ -265,23 +284,63 @@ const styles = StyleSheet.create({
     borderColor: '#495E57',
   },
   flatListContentContainer: {
-    paddingBottom: 200,
-  },
-  searchContainer: {
-    marginVertical: 8,
-    paddingHorizontal: 16,
-  },
-  searchInput: {
-    height: 40,
-    borderColor: '#495E57',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingBottom: 580,
   },
   noResultsText: {
     textAlign: 'center',
     marginTop: 16,
     fontSize: 16,
     color: '#495E57',
+  },
+  heroSectionContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginVertical: 4,
+    backgroundColor: '#495E57',
+    borderRadius: 8,
+    padding: 8,
+  },
+  heroTextsAndImageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heroTextsContainer: {
+    flex: 1,
+  },
+  heroSectionTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#F4CE14',
+  },
+  heroSectionSubtitle: {
+    fontSize: 24,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  heroSectionDescription: {
+    fontSize: 16,
+    color: 'white',
+    margin: 4,
+  },
+  heroImageContainer: {
+    margin: 4,
+  },
+  heroImage: {
+    width: 120,
+    height: 120,
+    resizeMode: 'cover',
+    borderRadius: 8,
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginVertical: 8,
+    width: '100%',
+    backgroundColor: 'white',
+    borderColor: '#F4CE14',
   },
 });

@@ -107,6 +107,8 @@ export default function HomeScreen() {
       onPress={() => handleCategoryPress(category)}>
       <Text
         style={{
+          fontFamily: 'Karla',
+          fontSize: 16,
           color: selectedCategories.includes(category.toLowerCase())
             ? 'white'
             : '#495E57',
@@ -235,18 +237,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontFamily: 'KarlaBold',
     marginBottom: 8,
   },
   price: {
     color: '#495E57',
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontFamily: 'markaziBold',
   },
   description: {
     color: '#495E57',
     fontSize: 16,
+    fontFamily: 'Karla',
   },
   menuItem: {
     flexDirection: 'row',
@@ -291,6 +294,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#495E57',
+    fontFamily: 'KarlaBold',
   },
   heroSectionContainer: {
     flexDirection: 'column',
@@ -310,19 +314,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroSectionTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 36,
+    fontFamily: 'markaziBold',
     color: '#F4CE14',
   },
   heroSectionSubtitle: {
-    fontSize: 24,
+    fontSize: 28,
     color: 'white',
-    fontWeight: 'bold',
+    fontFamily: 'markazi',
   },
   heroSectionDescription: {
     fontSize: 16,
     color: 'white',
     margin: 4,
+    fontFamily: 'Karla',
   },
   heroImageContainer: {
     margin: 4,
@@ -342,5 +347,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'white',
     borderColor: '#F4CE14',
+    fontFamily: 'KarlaBold',
   },
 });

@@ -427,18 +427,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#495E57',
     marginLeft: 8,
+    fontFamily: 'KarlaBold',
   },
   data: {
     fontSize: 16,
     color: '#808080',
     margin: 8,
+    fontFamily: 'Karla',
   },
   text: {
-    fontSize: 24,
+    fontSize: 32,
     color: '#333333',
     marginVertical: 8,
-    fontWeight: 'bold',
     paddingLeft: 8,
+    fontFamily: 'markaziBold',
   },
   rectangularFrame: {
     width: '95%',
@@ -468,11 +470,13 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     margin: 4,
+    fontFamily: 'Karla',
   },
   removeButtonText: {
     color: '#495E57',
     textAlign: 'center',
     margin: 4,
+    fontFamily: 'Karla',
   },
   checkboxesContainer: {
     flexDirection: 'column',
@@ -494,7 +498,7 @@ const styles = StyleSheet.create({
     color: '#333333',
     textAlign: 'center',
     margin: 4,
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontFamily: 'markaziBold',
   },
 });

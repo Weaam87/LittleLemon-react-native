@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,15 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
   const [firstName, setFirstName] = useState('');
+
+  // Load the font asynchronously
+  let [fontsLoaded] = useFonts({
+    'markazi': require('./assets/fonts/markazi.ttf'),
+    'Karla': require('./assets/fonts/Karla.ttf'),
+    'markaziBold': require('./assets/fonts/markaziBold.ttf'),
+    'KarlaBold': require('./assets/fonts/KarlaBold.ttf'),
+  });
+
 
   // Update the first name state asynchronously
   const updateFirstName = async (newFirstName) => {
@@ -107,6 +117,11 @@ export default function App() {
     fetchData();
   }, []); // Empty dependency array to run once on mount
 
+  if (!fontsLoaded) {
+    return (
+      <SplashScreen />
+    );
+  }
 
   return (
     <NavigationContainer>
@@ -179,11 +194,11 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   imageText: {
-    fontSize: 18,
+    fontSize: 24,
     color: '#F4CE14',
     textAlign: 'center',
     lineHeight: 50, // Line height to vertically center the text in the circle
-    fontWeight: 'bold',
+    fontFamily: 'markaziBold',
     width: 50,
     height: 50,
     borderRadius: 25, // Half of the width and height to make a perfect circle

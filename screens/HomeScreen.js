@@ -119,20 +119,37 @@ export default function HomeScreen() {
   );
 
 
-  const Item = ({ title, price, description, image }) => (
-    <View style={styles.rectangularFrame}>
-      <View style={styles.menuItem}>
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
-          <Text style={styles.price}>$ {price}</Text>
-        </View>
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: image }} style={styles.image} />
+  const Item = ({ title, price, description, image }) => {
+    const [showFullDescription, setShowFullDescription] = useState(false);
+    const truncatedDescription = description.substring(0, 80);
+
+    const handleReadMoreToggle = () => {
+      setShowFullDescription(!showFullDescription);
+    };
+
+    return (
+      <View style={styles.rectangularFrame}>
+        <View style={styles.menuItem}>
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.description}>
+              {showFullDescription ? description : truncatedDescription}
+              {description.length > 80 && (
+                <Text style={styles.readMoreLink} onPress={handleReadMoreToggle}>
+                  {showFullDescription ? ' Read less' : ' ... Read more'}
+                </Text>
+              )}
+            </Text>
+            <Text style={styles.price}>$ {price}</Text>
+          </View>
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: image }} style={styles.image} />
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
+
 
   const renderItem = ({ item }) => (
     <Item
@@ -287,7 +304,7 @@ const styles = StyleSheet.create({
     borderColor: '#495E57',
   },
   flatListContentContainer: {
-    paddingBottom: 580,
+    paddingBottom: 640,
   },
   noResultsText: {
     textAlign: 'center',
@@ -347,6 +364,11 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'white',
     borderColor: '#F4CE14',
+    fontFamily: 'KarlaBold',
+  },
+  readMoreLink: {
+    color: '#495E57',
+    textDecorationLine: 'underline',
     fontFamily: 'KarlaBold',
   },
 });
